@@ -6,22 +6,22 @@ import java.util.Objects;
 public class Department implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
-	private Long id;
+	private int id;
 	private String name;
 	
 	public Department() {}
 
-	public Department(Long id, String name) {
+	public Department(int id, String name) {
 		super();
 		this.id = id;
 		this.name = name;
 	}
 
-	public Long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
