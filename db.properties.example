@@ -1,0 +1,3 @@
+user=seu_usuario_aqui
+password=sua_senha_aqui
+dburl=jdbc:mysql://localhost:3306/javafxjbdc?useSSL=false&serverTimezone=UTC

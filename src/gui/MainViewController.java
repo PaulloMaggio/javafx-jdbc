@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 import application.Main;
+import db.DB;
 import gui.util.Alerts;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,55 +21,70 @@ import model.services.DepartmentService;
 
 public class MainViewController implements Initializable {
 
-	@FXML
-	private MenuItem menuItemSeller;
-	@FXML
-	private MenuItem menuItemDepartment;
-	@FXML
-	private MenuItem meniItemAbout;
+    @FXML
+    private MenuItem menuItemSeller;
+    @FXML
+    private MenuItem menuItemDepartment;
+    @FXML
+    private MenuItem meniItemAbout;
 
-	@FXML
-	public void onMenuItemSellerAction() {
-		System.out.println("onMenuSellerAction");
-	}
+    @FXML
+    public void onMenuItemSellerAction() {
+        System.out.println("onMenuSellerAction");
+    }
 
-	@FXML
-	public void onMenuItemDepartmentAction() {
-		loadView("/gui/DepartmentList.fxml", (DepartmentListController controller) -> {
-			controller.setDepartmentSevice(new DepartmentService());
-			controller.updateTableView();
-		});
-	}
-	
-	@FXML
-	public void onMenuItemAboutAction() {
-		loadView("/gui/About.fxml", x -> {});
-	}
+    @FXML
+    public void onMenuItemDepartmentAction() {
+        // ==================== TESTE DE CONEXÃO ====================
+        try {
+            DB.getConnection();           // Força a conexão com o banco
+            System.out.println("✅ Conexão com o banco de dados realizada com sucesso!");
+        } 
+        catch (Exception e) {
+            System.out.println("❌ Erro ao conectar com o banco de dados:");
+            e.printStackTrace();
+            Alerts.showAlert("Erro de Conexão", 
+                    "Não foi possível conectar ao banco de dados", 
+                    e.getMessage(), 
+                    AlertType.ERROR);
+            return;   // Interrompe se a conexão falhar
+        }
+        // =========================================================
 
-	@Override
-	public void initialize(URL uri, ResourceBundle rb) {
-	}
+        // Carrega a tela de Departments normalmente
+        loadView("/gui/DepartmentList.fxml", (DepartmentListController controller) -> {
+            controller.setDepartmentSevice(new DepartmentService());
+            controller.updateTableView();
+        });
+    }
+    
+    @FXML
+    public void onMenuItemAboutAction() {
+        loadView("/gui/About.fxml", x -> {});
+    }
 
-	private synchronized <T> void loadView(String AbsoluteName, Consumer<T> initialingAction) {
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource(AbsoluteName));
-			VBox newVBox = loader.load();
-			
-			Scene mainScene = Main.getMainScene();
-			VBox mainVBox = (VBox) ((ScrollPane)mainScene.getRoot()).getContent();
-			
-			Node mainMenu = mainVBox.getChildren().get(0);
-			mainVBox.getChildren().clear();
-			mainVBox.getChildren().add(mainMenu);
-			mainVBox.getChildren().addAll(newVBox.getChildren());
-			
-			T controler =loader.getController();
-			initialingAction.accept(controler);
-			
-		}
-		catch(IOException e) {
-			Alerts.showAlert("IOException", "Error loading view", e.getMessage(), AlertType.ERROR);		
-		}
-	}
+    @Override
+    public void initialize(URL uri, ResourceBundle rb) {
+    }
 
+    private synchronized <T> void loadView(String AbsoluteName, Consumer<T> initialingAction) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(AbsoluteName));
+            VBox newVBox = loader.load();
+            
+            Scene mainScene = Main.getMainScene();
+            VBox mainVBox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
+            
+            Node mainMenu = mainVBox.getChildren().get(0);
+            mainVBox.getChildren().clear();
+            mainVBox.getChildren().add(mainMenu);
+            mainVBox.getChildren().addAll(newVBox.getChildren());
+            
+            T controller = loader.getController();
+            initialingAction.accept(controller);
+            
+        } catch (IOException e) {
+            Alerts.showAlert("IOException", "Error loading view", e.getMessage(), AlertType.ERROR);		
+        }
+    }
 }
