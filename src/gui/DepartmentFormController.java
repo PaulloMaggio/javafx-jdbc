@@ -3,6 +3,7 @@ package gui;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import gui.util.Constraints;
 import gui.util.Utils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -46,7 +47,8 @@ public class DepartmentFormController implements Initializable {
 	}
 
 	private void initializeNodes() {
-		
+		Constraints.setTextFieldInteger(txtId);
+		Constraints.setTextFieldMaxLength(txtName, 30);
 		txtId.setEditable(false);
 	}
 }
