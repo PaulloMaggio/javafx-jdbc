@@ -22,5 +22,5 @@ public class Alerts {
 		alert.setHeaderText(null);
 		alert.setContentText(content);
 		return alert.showAndWait();
-	}
+	} 
 }
