@@ -16,11 +16,34 @@ import model.entities.Department;
 public class DepartmentDaoJDBC implements DepartmentDao {
 
 	private Connection conn;
-	
+
 	public DepartmentDaoJDBC(Connection conn) {
 		this.conn = conn;
 	}
-	
+
+	@Override
+	public Department findById(Long id) {
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement("SELECT * FROM department WHERE Id = ?");
+			st.setLong(1, id);
+			rs = st.executeQuery();
+			if (rs.next()) {
+				Department obj = new Department();
+				obj.setId(rs.getLong("Id"));
+				obj.setName(rs.getString("Name"));
+				return obj;
+			}
+			return null;
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
+	}
+
 	@Override
 	public List<Department> findAll() {
 		PreparedStatement st = null;
@@ -44,38 +67,64 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 		}
 	}
 
-    // Adicione os outros metodos (insert, update, findById) seguindo o padrao Long
-    @Override
-	public Department findById(Long id) {
+	@Override
+	public void insert(Department obj) {
 		PreparedStatement st = null;
-		ResultSet rs = null;
 		try {
-			st = conn.prepareStatement("SELECT * FROM department WHERE Id = ?");
-			st.setLong(1, id);
-			rs = st.executeQuery();
-			if (rs.next()) {
-				Department obj = new Department();
-				obj.setId(rs.getLong("Id"));
-				obj.setName(rs.getString("Name"));
-				return obj;
+			st = conn.prepareStatement(
+					"INSERT INTO department (Name) VALUES (?)", 
+					Statement.RETURN_GENERATED_KEYS);
+
+			st.setString(1, obj.getName());
+
+			int rowsAffected = st.executeUpdate();
+
+			if (rowsAffected > 0) {
+				ResultSet rs = st.getGeneratedKeys();
+				if (rs.next()) {
+					Long id = rs.getLong(1);
+					obj.setId(id);
+				}
+				DB.closeResultSet(rs);
+			} else {
+				throw new DbException("Erro inesperado! Nenhuma linha afetada.");
 			}
-			return null;
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
 			DB.closeStatement(st);
-			DB.closeResultSet(rs);
 		}
 	}
-    
-    @Override
+
+	@Override
+	public void update(Department obj) {
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement(
+					"UPDATE department SET Name = ? WHERE Id = ?");
+
+			st.setString(1, obj.getName());
+			st.setLong(2, obj.getId());
+
+			st.executeUpdate();
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+		}
+	}
+
+	@Override
 	public void deleteById(Long id) {
-        // Implementar deletar aqui usando st.setLong(1, id);
-    }
-    
-    @Override
-    public void insert(Department obj) {}
-    
-    @Override
-    public void update(Department obj) {}
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement("DELETE FROM department WHERE Id = ?");
+			st.setLong(1, id);
+			st.executeUpdate();
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+		}
+	}
 }
