@@ -10,7 +10,6 @@ import java.sql.Statement;
 import java.util.Properties;
 
 public class DB {
-
     private static Connection conn = null;
 
     public static Connection getConnection() {
@@ -18,14 +17,9 @@ public class DB {
             try {
                 Properties props = loadProperties();
                 String url = props.getProperty("dburl");
-                String user = props.getProperty("user");
-                String pass = props.getProperty("password");
-
-                conn = DriverManager.getConnection(url, user, pass);
-                System.out.println("Conexão com o banco de dados realizada com sucesso!");
-            } 
-            catch (SQLException e) {
-                throw new DbException("Erro ao conectar ao banco de dados: " + e.getMessage());
+                conn = DriverManager.getConnection(url, props);
+            } catch (SQLException e) {
+                throw new DbException(e.getMessage());
             }
         }
         return conn;
@@ -35,10 +29,8 @@ public class DB {
         if (conn != null) {
             try {
                 conn.close();
-                conn = null;
-                System.out.println("Conexão fechada.");
             } catch (SQLException e) {
-                throw new DbException("Erro ao fechar conexão: " + e.getMessage());
+                throw new DbException(e.getMessage());
             }
         }
     }
@@ -49,11 +41,10 @@ public class DB {
             props.load(fs);
             return props;
         } catch (IOException e) {
-            throw new DbException("Arquivo db.properties não encontrado na raiz do projeto!");
+            throw new DbException(e.getMessage());
         }
     }
 
-    // métodos auxiliares (mantidos)
     public static void closeStatement(Statement st) {
         if (st != null) {
             try {
